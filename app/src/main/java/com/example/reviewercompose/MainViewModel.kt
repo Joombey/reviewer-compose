@@ -2,8 +2,8 @@ package com.example.reviewercompose
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.reviewercompose.data.user.User
-import com.example.reviewercompose.ui.Screen
+import com.example.reviewercompose.data.entities.User
+import com.example.reviewercompose.presentation.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

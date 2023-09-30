@@ -21,12 +21,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.reviewercompose.ui.Screen
-import com.example.reviewercompose.ui.screens.auth.AuthScreen
-import com.example.reviewercompose.ui.screens.home.ui.UserPageScreen
-import com.example.reviewercompose.ui.screens.review.creator.ui.ReviewCreationScreen
-import com.example.reviewercompose.ui.screens.reviews.ui.ReviewListScreen
-import com.example.reviewercompose.ui.theme.ReviewerComposeTheme
+import com.example.reviewercompose.presentation.Screen
+import com.example.reviewercompose.presentation.screens.auth.ui.AuthScreen
+import com.example.reviewercompose.presentation.screens.home.ui.UserPageScreen
+import com.example.reviewercompose.presentation.screens.review.creator.ui.ReviewCreationScreen
+import com.example.reviewercompose.presentation.screens.reviews.ui.ReviewListScreen
+import com.example.reviewercompose.presentation.theme.ReviewerComposeTheme
 
 class MainActivity : ComponentActivity() {
     private val activityViewModel: MainViewModel by viewModels()
