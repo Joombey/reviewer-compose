@@ -9,7 +9,7 @@ import java.util.UUID
 
 @Entity(
     tableName = "paragraphs",
-    indices = [Index("id")],
+    indices = [Index("id", "review_id")],
     foreignKeys = [
         ForeignKey(
             entity = ReviewEntity::class,

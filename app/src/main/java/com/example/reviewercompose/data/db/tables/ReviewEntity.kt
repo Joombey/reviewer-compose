@@ -3,6 +3,8 @@ package com.example.reviewercompose.data.db.tables
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import java.util.UUID
 
 @Entity(
@@ -25,9 +27,14 @@ import java.util.UUID
             deferred = true
         )
     ],
-    primaryKeys = ["id", "user_id"]
+//    primaryKeys = ["id", "user_id"],
+    indices = [
+        Index(value = ["item_id", "id"]),
+        Index(value = ["user_id"], unique = true)
+    ]
 )
 data class ReviewEntity(
+    @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
     val title: String,
     @ColumnInfo("creation_date")

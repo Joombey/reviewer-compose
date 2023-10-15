@@ -1,4 +1,5 @@
 package com.example.reviewercompose.data
 
-class DataBaseRepository {
+interface DataBaseRepository {
+
 }

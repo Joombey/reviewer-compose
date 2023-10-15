@@ -30,7 +30,7 @@ class MainViewModel : ViewModel() {
         Screen.ReviewListScreen,
         Screen.ReviewCreationScreen,
         Screen.UserProfileScreen,
-        Screen.AuthScreen
+        Screen.AuthGraph
     )
 }
 

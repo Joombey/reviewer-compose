@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">ReviewerCompose</string>
+
+    <string name="reviews_screen_label">Отзывы</string>
+    <string name="login_screen_label">Войти</string>
+    <string name="review_creation_screen_label">Создать</string>
+    <string name="profile_screen_label">Профиль</string>
 </resources>

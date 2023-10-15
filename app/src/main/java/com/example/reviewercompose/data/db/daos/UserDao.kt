@@ -8,5 +8,5 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface UserDao {
     @Query("SELECT * FROM users")
-    suspend fun getAllUsers(): Flow<UserEntity>
+    fun getAllUsers(): Flow<UserEntity>
 }

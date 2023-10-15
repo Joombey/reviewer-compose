@@ -13,16 +13,16 @@ import com.example.reviewercompose.data.db.tables.UserEntity
 
 @Database(
     entities = [
-        ImageEntity::class,
+        UserEntity::class,
         ItemEntity::class,
-        ParagraphEntity::class,
         ReviewEntity::class,
-        UserEntity::class
+        ParagraphEntity::class,
+        ImageEntity::class,
     ],
     version = 1,
     exportSchema = false
 )
-abstract class ReviewDatabase: RoomDatabase() {
+abstract class ReviewDatabase : RoomDatabase() {
     abstract val userDao: UserDao
 
     companion object {
@@ -37,7 +37,9 @@ abstract class ReviewDatabase: RoomDatabase() {
                     context.applicationContext,
                     ReviewDatabase::class.java,
                     DATABASE_NAME
-                ).fallbackToDestructiveMigration().build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 return INSTANCE!!
             }
         }

@@ -9,7 +9,7 @@ import java.util.UUID
 
 @Entity(
     tableName = "images",
-    indices = [Index("id")],
+    indices = [Index("id", "user_id", "item_id", "paragraph_id")],
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,
