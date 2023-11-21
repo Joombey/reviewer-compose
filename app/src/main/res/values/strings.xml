@@ -2,7 +2,10 @@
     <string name="app_name">ReviewerCompose</string>
 
     <string name="reviews_screen_label">Отзывы</string>
-    <string name="login_screen_label">Войти</string>
+    <string name="login_screen_label">Логин</string>
+    <string name="sign_in_screen_label">Войти</string>
+    <string name="password_screen_label">Пароль</string>
     <string name="review_creation_screen_label">Создать</string>
+    <string name="sign_up_label">Зарегистрироваться</string>
     <string name="profile_screen_label">Профиль</string>
 </resources>

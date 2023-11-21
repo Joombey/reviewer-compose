@@ -1,7 +1,6 @@
 package com.example.reviewercompose
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -29,12 +29,14 @@ import androidx.navigation.navigation
 import com.example.reviewercompose.presentation.Screen
 import com.example.reviewercompose.presentation.screens.auth.ui.AuthScreen
 import com.example.reviewercompose.presentation.screens.home.ui.UserPageScreen
+import com.example.reviewercompose.presentation.screens.register.ui.RegistrationScreen
 import com.example.reviewercompose.presentation.screens.review.creator.ui.ReviewCreationScreen
 import com.example.reviewercompose.presentation.screens.reviews.ui.ReviewListScreen
 import com.example.reviewercompose.presentation.theme.ReviewerComposeTheme
+import com.example.reviewercompose.utils.toast
 
 class MainActivity : ComponentActivity() {
-    private val activityViewModel: MainViewModel by viewModels()
+    private val activityViewModel: MainViewModel by viewModels() { MainViewModel.Factory }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +49,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     bottomBar = {
                         ReviewerBottomAppBar(
-                            onClick = { screen -> navController.navigateToWithOptions(screen.route)},
+                            onClick = { screen -> navController.navigateToWithOptions(screen.route) },
                             isCurrent = { screen ->
                                 currentBackStack?.destination?.route?.let { route ->
                                     val counted = route.count { it == '/' }
@@ -61,6 +63,9 @@ class MainActivity : ComponentActivity() {
                     }
                 ) {
                     ReviewerApp(
+                        onSignUpComplete = {
+                            navController.navigateToWithOptions(Screen.ReviewListScreen.route)
+                        },
                         navController = navController,
                         modifier = Modifier
                             .padding(it)
@@ -94,6 +99,7 @@ fun ReviewerBottomAppBar(
 
 @Composable
 fun ReviewerApp(
+    onSignUpComplete: () -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -128,26 +134,26 @@ fun ReviewerApp(
                 route = Screen.AuthGraph.AuthScreen.route,
                 arguments = Screen.AuthGraph.args
             ) {
+                val context = LocalContext.current
                 AuthScreen(
-                    onLoginClick = {login, password ->  },
-                    onGoToRegisterClick = {},
+                    onLoginClick = { login, password -> context.toast("$password $login") },
+                    onGoToRegisterClick = {
+                        navController.navigateToWithOptions(Screen.AuthGraph.RegisterScreen.route)
+                    },
                 )
             }
 
             composable(
-                route = Screen.AuthGraph.AuthScreen.route,
+                route = Screen.AuthGraph.RegisterScreen.route,
                 arguments = Screen.AuthGraph.args
             ) {
-                AuthScreen(
-                    onLoginClick = {login, password ->  },
-                    onGoToRegisterClick = {},
-                )
+                RegistrationScreen(onSignUpComplete)
             }
         }
     }
 }
 
-fun NavController.navigateToWithOptions(route: String){
+fun NavController.navigateToWithOptions(route: String) {
     navigate(route) {
         launchSingleTop = true
         restoreState = true

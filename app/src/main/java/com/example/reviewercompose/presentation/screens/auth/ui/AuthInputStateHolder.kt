@@ -1,5 +1,6 @@
 package com.example.reviewercompose.presentation.screens.auth.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue

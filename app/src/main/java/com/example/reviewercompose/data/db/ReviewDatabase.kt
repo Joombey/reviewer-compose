@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.reviewercompose.data.db.daos.ImageDao
 import com.example.reviewercompose.data.db.daos.UserDao
 import com.example.reviewercompose.data.db.tables.ImageEntity
 import com.example.reviewercompose.data.db.tables.ItemEntity
 import com.example.reviewercompose.data.db.tables.ParagraphEntity
 import com.example.reviewercompose.data.db.tables.ReviewEntity
 import com.example.reviewercompose.data.db.tables.UserEntity
+import com.example.reviewercompose.data.entities.User
 
 @Database(
     entities = [
@@ -19,11 +21,15 @@ import com.example.reviewercompose.data.db.tables.UserEntity
         ParagraphEntity::class,
         ImageEntity::class,
     ],
-    version = 1,
+    views = [
+        User::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class ReviewDatabase : RoomDatabase() {
     abstract val userDao: UserDao
+    abstract val imageDao: ImageDao
 
     companion object {
         @Volatile

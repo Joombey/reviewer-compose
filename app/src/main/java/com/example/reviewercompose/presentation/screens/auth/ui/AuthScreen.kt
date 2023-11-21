@@ -2,6 +2,7 @@ package com.example.reviewercompose.presentation.screens.auth.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -30,6 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.reviewercompose.R
 import com.example.reviewercompose.presentation.screens.auth.AuthViewModel
 import com.example.reviewercompose.presentation.theme.PlaceholderGreen
 import com.example.reviewercompose.presentation.theme.PlaceholderPink
@@ -43,8 +46,8 @@ fun AuthScreen(
 ) {
     val authInputStateHolder = rememberAuthInputSavable(
         hint = AuthInputStateHolder.AuthHint(
-            loginHint = "Логин",
-            passwordHint = "Пароль"
+            loginHint = stringResource(R.string.login_screen_label),
+            passwordHint = stringResource(R.string.password_screen_label),
         )
     )
     Surface(modifier.padding(8.dp)) {
@@ -82,7 +85,7 @@ fun AuthScreen(
                 )
 
                 ReviewerButton(
-                    text = "Войти",
+                    text = stringResource(R.string.sign_in_screen_label),
                     onClick = {
                         onLoginClick(
                             authInputStateHolder.login,
