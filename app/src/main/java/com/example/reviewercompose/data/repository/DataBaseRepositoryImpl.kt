@@ -1,4 +1,4 @@
-package com.example.reviewercompose.data
+package com.example.reviewercompose.data.repository
 
 import com.example.reviewercompose.data.db.ReviewDatabase
 import com.example.reviewercompose.data.db.tables.ImageEntity

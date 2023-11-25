@@ -64,7 +64,7 @@ sealed interface Screen {
 
         val unAuthenticatedScreens = listOf(
             ReviewListScreen,
-            ReviewCreationScreen,
+//            ReviewCreationScreen,
             AuthGraph
         )
     }

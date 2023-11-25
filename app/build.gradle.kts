@@ -1,7 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id ("kotlin-kapt")
+    id("kotlin-kapt")
+    id("kotlinx-serialization")
 }
 
 android {
@@ -9,6 +10,16 @@ android {
     compileSdk = 34
 
     defaultConfig {
+        buildConfigField(
+            type = "String",
+            name = "API_KEY",
+            value = "\"50afda93196d3860db7a3e5e94a7b444762e86b075ce569a60054bbeaff209f5\""
+        )
+        buildConfigField(
+            type = "String",
+            name = "SHOPPING_URL",
+            value = "\"https://serpapi.com/search.json?engine=google_shopping&google_domain=google.ru&gl=ru&hl=ru\""
+        )
         applicationId = "com.example.reviewercompose"
         minSdk = 29
         targetSdk = 33
@@ -39,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
@@ -103,4 +115,20 @@ dependencies {
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
+
+    //ktor
+    val ktor_version = "2.3.6"
+    val serialization_version = "1.6.1"
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-client-serialization:$ktor_version")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+    //ktor-engine
+    implementation("io.ktor:ktor-client-android:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
+
+    //serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
 }

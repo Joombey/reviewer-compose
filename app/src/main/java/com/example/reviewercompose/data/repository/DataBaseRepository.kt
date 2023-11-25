@@ -1,4 +1,4 @@
-package com.example.reviewercompose.data
+package com.example.reviewercompose.data.repository
 
 import com.example.reviewercompose.data.entities.User
 import kotlinx.coroutines.flow.Flow

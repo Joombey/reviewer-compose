@@ -8,7 +8,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.reviewercompose.ReviewerApplication
-import com.example.reviewercompose.data.DataBaseRepository
+import com.example.reviewercompose.data.repository.DataBaseRepository
 import com.example.reviewercompose.data.entities.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
