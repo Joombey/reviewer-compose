@@ -2,7 +2,6 @@ package com.example.reviewercompose.presentation.screens.auth.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,13 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,7 +62,7 @@ fun AuthScreen(
                     .weight(3f)
                     .padding(horizontal = 20.dp)
             ) {
-                ReviewerText(
+                ReviewerTextField(
                     hint = authInputStateHolder.hint.loginHint,
                     text = authInputStateHolder.login,
                     onTextChange = authInputStateHolder::updateLoginInput,
@@ -75,7 +70,7 @@ fun AuthScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                ReviewerText(
+                ReviewerTextField(
                     hint = authInputStateHolder.hint.passwordHint,
                     text = authInputStateHolder.password,
                     onTextChange = authInputStateHolder::updatePasswordInput,
@@ -128,13 +123,14 @@ fun ReviewerButton(text: String, onClick: () -> Unit, modifier: Modifier = Modif
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewerText(
+fun ReviewerTextField(
     hint: String,
     text: String,
     onTextChange: (String) -> Unit,
     keyboardType: KeyboardType,
     modifier: Modifier = Modifier,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     Surface(modifier = modifier) {
         TextField(
@@ -153,6 +149,7 @@ fun ReviewerText(
                 autoCorrect = false,
                 keyboardType = keyboardType
             ),
+            trailingIcon = trailingIcon
         )
     }
 }

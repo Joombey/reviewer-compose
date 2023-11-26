@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     bottomBar = {
                         ReviewerBottomAppBar(
-                            onClick = { screen -> navController.navigateToWithOptions(screen.route) },
+                            onClick = { screen -> navController.navigateWithOptionsTo(screen.route) },
                             isCurrent = { screen ->
                                 currentBackStack?.destination?.route?.let { route ->
                                     val counted = route.count { it == '/' }
@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     ReviewerApp(
                         onSignUpComplete = {
-                            navController.navigateToWithOptions(Screen.ReviewListScreen.route)
+                            navController.navigateWithOptionsTo(Screen.ReviewListScreen.route)
                         },
                         navController = navController,
                         modifier = Modifier
@@ -138,7 +138,7 @@ fun ReviewerApp(
                 AuthScreen(
                     onLoginClick = { login, password -> context.toast("$password $login") },
                     onGoToRegisterClick = {
-                        navController.navigateToWithOptions(Screen.AuthGraph.RegisterScreen.route)
+                        navController.navigateWithOptionsTo(Screen.AuthGraph.RegisterScreen.route)
                     },
                 )
             }
@@ -153,7 +153,7 @@ fun ReviewerApp(
     }
 }
 
-fun NavController.navigateToWithOptions(route: String) {
+fun NavController.navigateWithOptionsTo(route: String) {
     navigate(route) {
         launchSingleTop = true
         restoreState = true

@@ -3,10 +3,10 @@ package com.example.reviewercompose
 import android.app.Application
 import android.util.Log
 import com.example.reviewercompose.data.api.OkHttpInterceptor
-import com.example.reviewercompose.data.api.SerpApiRepository
-import com.example.reviewercompose.data.api.SerpApiRepositoryImpl
-import com.example.reviewercompose.data.repository.DataBaseRepository
-import com.example.reviewercompose.data.repository.DataBaseRepositoryImpl
+import com.example.reviewercompose.data.repository.api.SerpApiRepository
+import com.example.reviewercompose.data.repository.api.SerpApiRepositoryImpl
+import com.example.reviewercompose.data.repository.db.DataBaseRepository
+import com.example.reviewercompose.data.repository.db.DataBaseRepositoryImpl
 import com.example.reviewercompose.data.db.ReviewDatabase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -28,6 +28,8 @@ class ReviewerApplication : Application() {
         _userRepository = DataBaseRepositoryImpl(db)
         val httpClient = configureHttpClient()
         ServiceLocator.setHttpClient(httpClient)
+        ServiceLocator.setCacheDir(cacheDir.path)
+        ServiceLocator.setMediaDir(filesDir.path + "/media")
         _apiRepository = SerpApiRepositoryImpl()
     }
 

@@ -1,8 +1,11 @@
-package com.example.reviewercompose.data.repository
+package com.example.reviewercompose.data.repository.db
 
 import com.example.reviewercompose.data.db.ReviewDatabase
 import com.example.reviewercompose.data.db.tables.ImageEntity
+import com.example.reviewercompose.data.db.tables.ItemEntity
 import com.example.reviewercompose.data.db.tables.UserEntity
+import com.example.reviewercompose.data.entities.Paragraph
+import com.example.reviewercompose.data.entities.Product
 import com.example.reviewercompose.data.entities.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +29,14 @@ class DataBaseRepositoryImpl(private val db: ReviewDatabase): DataBaseRepository
         )
         db.userDao.insertUser(userEntity)
         db.imageDao.insertImage(imageEntity)
+    }
 
+    override suspend fun createReview(product: Product, paragraphs: List<Paragraph>) {
+        val newItem = ItemEntity(
+            model = product.title,
+
+        )
+        db.itemDao.insert()
     }
 
     private val ioScope = CoroutineScope(Dispatchers.IO)

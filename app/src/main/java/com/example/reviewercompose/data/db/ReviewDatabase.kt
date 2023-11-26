@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.reviewercompose.data.db.daos.ImageDao
+import com.example.reviewercompose.data.db.daos.ItemDao
 import com.example.reviewercompose.data.db.daos.UserDao
 import com.example.reviewercompose.data.db.tables.ImageEntity
 import com.example.reviewercompose.data.db.tables.ItemEntity
@@ -30,6 +31,7 @@ import com.example.reviewercompose.data.entities.User
 abstract class ReviewDatabase : RoomDatabase() {
     abstract val userDao: UserDao
     abstract val imageDao: ImageDao
+    abstract val itemDao: ItemDao
 
     companion object {
         @Volatile

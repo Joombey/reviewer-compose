@@ -40,7 +40,7 @@ import com.example.reviewercompose.R
 import com.example.reviewercompose.data.entities.User
 import com.example.reviewercompose.presentation.screens.auth.ui.AuthInputStateHolder
 import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerButton
-import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerText
+import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerTextField
 import com.example.reviewercompose.presentation.screens.auth.ui.rememberAuthInputSavable
 import com.example.reviewercompose.utils.toast
 import kotlinx.coroutines.launch
@@ -71,9 +71,9 @@ fun RegistrationScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            UserIcon(
+            ImageWithAddPlaceholder(
                 uri = chosenIconUri,
-                onSetUserIcon = { registry.launch(arrayOf("image/*")) },
+                onAddButtonPress = { registry.launch(arrayOf("image/*")) },
                 modifier = modifier.weight(1f)
             )
             val state: AuthInputStateHolder = rememberAuthInputSavable(
@@ -112,7 +112,7 @@ fun RegistrationBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        ReviewerText(
+        ReviewerTextField(
             hint = stringResource(R.string.login_screen_label),
             text = authInputStateHolder.login,
             onTextChange = authInputStateHolder::updateLoginInput,
@@ -120,7 +120,7 @@ fun RegistrationBody(
             modifier = Modifier.fillMaxWidth()
         )
 
-        ReviewerText(
+        ReviewerTextField(
             hint = authInputStateHolder.hint.passwordHint,
             text = authInputStateHolder.password,
             onTextChange = authInputStateHolder::updatePasswordInput,
@@ -148,9 +148,9 @@ fun RegistrationBody(
 }
 
 @Composable
-fun UserIcon(
+fun ImageWithAddPlaceholder(
     uri: Uri?,
-    onSetUserIcon: () -> Unit,
+    onAddButtonPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier) {
@@ -161,7 +161,7 @@ fun UserIcon(
                 imageVector = Icons.Filled.AddBox,
                 modifier = Modifier
                     .size(100.dp)
-                    .clickable(onClick = onSetUserIcon)
+                    .clickable(onClick = onAddButtonPress)
             )
         } else {
             val contentResolver = LocalContext.current.contentResolver
@@ -173,7 +173,7 @@ fun UserIcon(
                 bitmap = bitmap.asImageBitmap(),
                 modifier = Modifier
                     .size(100.dp)
-                    .clickable(onClick = onSetUserIcon)
+                    .clickable(onClick = onAddButtonPress)
             )
         }
     }

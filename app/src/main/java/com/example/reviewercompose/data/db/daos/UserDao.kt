@@ -19,4 +19,8 @@ interface UserDao {
     @Transaction
     @Query("SELECT * FROM User")
     fun currentUser(): Flow<User>
+
+    @Transaction
+    @Query("SELECT * FROM User")
+    suspend fun getCurrentUser(): User
 }

@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.SensorDoor
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NamedNavArgument
@@ -44,8 +45,10 @@ sealed interface Screen {
         )
     }
 
-    object AuthGraph : Screen by UserProfileScreen {
+    object AuthGraph : Screen {
         override val route: String = "auth"
+        override val navIcon: ImageVector = Icons.Filled.SensorDoor
+        override val label: Int = R.string.sign_in_screen_label
         object AuthScreen : Screen {
             override val route: String = "${AuthGraph.route}/sign-in"
         }
