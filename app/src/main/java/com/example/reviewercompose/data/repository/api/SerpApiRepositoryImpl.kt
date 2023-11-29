@@ -7,7 +7,8 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.contentLength
+import io.ktor.util.InternalAPI
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.nio.ByteBuffer
@@ -25,10 +26,12 @@ class SerpApiRepositoryImpl : SerpApiRepository {
         QueryResult.ServerError
     }
 
-    override suspend fun fetchBytes(url: String): ByteArray {
-        val byteBuffer: ByteBuffer = ByteBuffer.allocate(50 * 1024)
-        client.get(url).bodyAsChannel().readFully(byteBuffer)
-        return byteBuffer.array()
+    @OptIn(InternalAPI::class)
+    override suspend fun fetchBytes(url: String): ByteArray = client.get(url).let { response ->
+        val channel = response.content
+        val byteBuffer: ByteBuffer = ByteBuffer.allocate(response.contentLength()!!.toInt())
+        channel.readFully(byteBuffer)
+        byteBuffer.array()
     }
 }
 
@@ -48,7 +51,7 @@ sealed class QueryResult {
 data class ShoppingResult(
     val position: Int,
     @SerialName("product_id")
-    val productId: Int,
+    val productId: String,
     val title: String,
     val rating: String? = null,
     @SerialName("thumbnail")

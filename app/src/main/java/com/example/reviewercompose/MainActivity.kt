@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.example.reviewercompose.data.entities.User
 import com.example.reviewercompose.presentation.Screen
 import com.example.reviewercompose.presentation.screens.auth.ui.AuthScreen
 import com.example.reviewercompose.presentation.screens.home.ui.UserPageScreen
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
             ReviewerComposeTheme {
                 val navController: NavHostController = rememberNavController()
                 val currentBackStack by navController.currentBackStackEntryAsState()
-                val availableScreens: List<Screen> by activityViewModel.availableScreens.collectAsStateWithLifecycle()
+                val userAuthState: UserAuthState by activityViewModel.userAuthState.collectAsStateWithLifecycle()
                 Scaffold(
                     bottomBar = {
                         ReviewerBottomAppBar(
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
                                     else route
                                 } == screen.route
                             },
-                            screenList = availableScreens
+                            screenList = userAuthState.availableScreen
                         )
                     }
                 ) {
@@ -66,6 +67,7 @@ class MainActivity : ComponentActivity() {
                         onSignUpComplete = {
                             navController.navigateWithOptionsTo(Screen.ReviewListScreen.route)
                         },
+                        currentUser = (userAuthState as? UserAuthState.Authorized)?.user,
                         navController = navController,
                         modifier = Modifier
                             .padding(it)
@@ -101,7 +103,8 @@ fun ReviewerBottomAppBar(
 fun ReviewerApp(
     onSignUpComplete: () -> Unit,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    currentUser: User? = null
 ) {
     NavHost(
         navController = navController,
@@ -109,7 +112,7 @@ fun ReviewerApp(
         modifier = modifier
     ) {
         composable(Screen.ReviewCreationScreen.route) { navBackStackEntry ->
-            ReviewCreationScreen()
+            ReviewCreationScreen(currentUser!!)
         }
 
         composable(

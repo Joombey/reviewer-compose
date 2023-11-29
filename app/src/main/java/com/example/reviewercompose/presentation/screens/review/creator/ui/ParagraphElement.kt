@@ -6,13 +6,18 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -32,11 +37,7 @@ fun ParagraphElement(
     modifier: Modifier = Modifier,
     readOnly: Boolean = false,
 ) {
-    Column(
-        modifier = modifier
-            .background(ParagraphBackground)
-            .clip(RoundedCornerShape(4.dp))
-    ) {
+    Column(modifier = modifier) {
         val context = LocalContext.current
         val pagerState = rememberPagerState { item.photosUris.size + 1 }
         val registry = rememberLauncherForActivityResult(
@@ -52,26 +53,32 @@ fun ParagraphElement(
             }
         )
         EditableText(
+            hint = "Заголовок",
             text = item.title,
             onTextChange = onTitleTextChange,
             textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = readOnly
+            modifier = modifier,
+            readOnly = readOnly,
+            singleLine = true
         )
 
         EditableText(
+            hint = "Текст",
             text = item.text,
             onTextChange = onBodyTextChange,
             textStyle = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = readOnly
+            modifier = modifier.height(300.dp),
+            readOnly = readOnly,
         )
 
-        HorizontalPager(pagerState) { position ->
-            ImageWithAddPlaceholder(
-                uri = item.photosUris.getOrNull(position)?.let { Uri.parse(it) },
-                onAddButtonPress = { registry.launch(arrayOf("image/*")) }
-            )
+        HorizontalPager(modifier = modifier.fillMaxWidth(), state = pagerState) { position ->
+            Box(Modifier.fillMaxSize().padding(8.dp)){
+                ImageWithAddPlaceholder(
+                    modifier = Modifier.align(Alignment.Center),
+                    uri = item.photosUris.getOrNull(position)?.let { Uri.parse(it) },
+                    onAddButtonPress = { registry.launch(arrayOf("image/*")) }
+                )
+            }
         }
     }
 }

@@ -7,6 +7,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface DataBaseRepository {
     suspend fun createUser(user: User, login: String, password: String)
-    suspend fun createReview(product: Product, paragraphs: List<Paragraph>)
+    suspend fun createReview(
+        user: User,
+        product: Product,
+        paragraphs: List<Paragraph>,
+        imagePath: String? = null
+    )
+
     val currentUser: Flow<User?>
 }

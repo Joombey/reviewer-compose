@@ -3,6 +3,8 @@ package com.example.reviewercompose.data.repository.db
 import com.example.reviewercompose.data.db.ReviewDatabase
 import com.example.reviewercompose.data.db.tables.ImageEntity
 import com.example.reviewercompose.data.db.tables.ItemEntity
+import com.example.reviewercompose.data.db.tables.ParagraphEntity
+import com.example.reviewercompose.data.db.tables.ReviewEntity
 import com.example.reviewercompose.data.db.tables.UserEntity
 import com.example.reviewercompose.data.entities.Paragraph
 import com.example.reviewercompose.data.entities.Product
@@ -10,14 +12,15 @@ import com.example.reviewercompose.data.entities.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import java.lang.System.currentTimeMillis
 
 class DataBaseRepositoryImpl(private val db: ReviewDatabase): DataBaseRepository {
     override suspend fun createUser(user: User, login: String, password: String) {
         val userEntity = UserEntity(
             isCurrent = true,
             name = user.name,
-            creationTime = System.currentTimeMillis(),
-            lastOnline = System.currentTimeMillis(),
+            creationTime = currentTimeMillis(),
+            lastOnline = currentTimeMillis(),
             login = login,
             password = password
         )
@@ -31,14 +34,30 @@ class DataBaseRepositoryImpl(private val db: ReviewDatabase): DataBaseRepository
         db.imageDao.insertImage(imageEntity)
     }
 
-    override suspend fun createReview(product: Product, paragraphs: List<Paragraph>) {
-        val newItem = ItemEntity(
-            model = product.title,
-
+    override suspend fun createReview(
+        user: User,
+        product: Product,
+        paragraphs: List<Paragraph>,
+        imagePath: String?
+    ) {
+        val item = ItemEntity(model = product.title, image = imagePath)
+        db.itemDao.insert(item)
+        val review = ReviewEntity(
+            title = product.title,
+            userId = user.id,
+            itemId = item.id,
+            creationDate = currentTimeMillis()
         )
-        db.itemDao.insert()
+        db.reviewDao.insert(review)
+        val paragraphs = List(paragraphs.size) { id ->
+            val paragraph =ParagraphEntity(
+                title = paragraphs[id].title,
+                text = paragraphs[id].text,
+                reviewId = review.id
+            )
+            db.paragraphDao.insert(paragraph)
+        }
     }
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
     override val currentUser: Flow<User?> = db.userDao.currentUser()
 }

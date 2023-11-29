@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -114,6 +115,7 @@ fun ReviewerButton(text: String, onClick: () -> Unit, modifier: Modifier = Modif
         text = text,
         color = Color.White,
         modifier = modifier
+            .clip(shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
             .clickable { onClick() }
@@ -130,9 +132,11 @@ fun ReviewerTextField(
     keyboardType: KeyboardType,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: @Composable (() -> Unit)? = null,
+    textStyle: TextStyle? = null,
+    singleLine: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
-    Surface(modifier = modifier) {
+    Surface {
         TextField(
             value = text,
             onValueChange = onTextChange,
@@ -140,8 +144,8 @@ fun ReviewerTextField(
             placeholder = {
                 Text(
                     text = hint,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = PlaceholderPink
+                    style = textStyle ?: MaterialTheme.typography.bodySmall,
+                    color = PlaceholderPink,
                 )
             },
             keyboardOptions = KeyboardOptions(
@@ -149,7 +153,10 @@ fun ReviewerTextField(
                 autoCorrect = false,
                 keyboardType = keyboardType
             ),
-            trailingIcon = trailingIcon
+            trailingIcon = trailingIcon,
+            modifier = modifier,
+            textStyle = textStyle ?: MaterialTheme.typography.bodySmall,
+            singleLine = singleLine
         )
     }
 }

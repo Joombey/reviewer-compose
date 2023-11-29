@@ -12,48 +12,40 @@ import com.example.reviewercompose.data.entities.User
 import com.example.reviewercompose.presentation.Screen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 
 class MainViewModel(
     private val userRepository: DataBaseRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val _currentUser = MutableStateFlow<UserAuthState>(UserAuthState.Unauthorized)
-    val availableScreens: StateFlow<List<Screen>> = flow {
-        _currentUser.collect {
-            when (it) {
-                is UserAuthState.Authorized -> emit(Screen.authenticatedScreens)
-                UserAuthState.Unauthorized -> emit(Screen.unAuthenticatedScreens)
-            }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = Screen.unAuthenticatedScreens
-    )
+    private val _userAuthState = MutableStateFlow<UserAuthState>(UserAuthState.Unauthorized)
+//    val availableScreens: StateFlow<UserAuthState> = flow {
+//        _currentUser.collect {
+//            when (it) {
+//                is UserAuthState.Authorized -> emit(Screen.authenticatedScreens)
+//                UserAuthState.Unauthorized -> emit(Screen.unAuthenticatedScreens)
+//            }
+//        }
+//    }.stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.Lazily,
+//        initialValue = UserAuthState.Unauthorized
+//    )
+
+    val userAuthState get() = _userAuthState.asStateFlow()
 
     init {
         userRepository.currentUser
             .onEach {
-                if (it == null) _currentUser.value = UserAuthState.Unauthorized
-                else _currentUser.value = UserAuthState.Authorized(it)
+                if (it == null) _userAuthState.value = UserAuthState.Unauthorized
+                else _userAuthState.value = UserAuthState.Authorized(it)
             }
             .flowOn(Dispatchers.IO)
             .launchIn(viewModelScope)
     }
-
-    val allScreens: List<Screen> = listOf(
-        Screen.ReviewListScreen,
-        Screen.ReviewCreationScreen,
-        Screen.UserProfileScreen,
-        Screen.AuthGraph
-    )
 
     companion object Factory: ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -65,7 +57,7 @@ class MainViewModel(
     }
 }
 
-sealed interface UserAuthState {
-    object Unauthorized : UserAuthState
-    data class Authorized(val user: User) : UserAuthState
+sealed class UserAuthState(val availableScreen: List<Screen>) {
+    object Unauthorized : UserAuthState(Screen.unAuthenticatedScreens)
+    data class Authorized(val user: User) : UserAuthState(Screen.authenticatedScreens)
 }

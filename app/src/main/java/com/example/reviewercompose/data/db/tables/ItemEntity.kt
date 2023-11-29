@@ -13,5 +13,5 @@ data class ItemEntity(
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
     val model: String,
-    val image: String
+    val image: String?
 )

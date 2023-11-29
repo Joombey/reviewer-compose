@@ -8,6 +8,8 @@ import com.example.reviewercompose.data.repository.api.SerpApiRepositoryImpl
 import com.example.reviewercompose.data.repository.db.DataBaseRepository
 import com.example.reviewercompose.data.repository.db.DataBaseRepositoryImpl
 import com.example.reviewercompose.data.db.ReviewDatabase
+import com.example.reviewercompose.data.repository.storage.StorageRepository
+import com.example.reviewercompose.data.repository.storage.StorageRepositoryImpl
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -21,7 +23,14 @@ import kotlinx.serialization.json.JsonNamingStrategy
 
 class ReviewerApplication : Application() {
     private var _userRepository: DataBaseRepositoryImpl? = null
+    val userRepository: DataBaseRepository get() = _userRepository!!
+
     private var _apiRepository: SerpApiRepository? = null
+    val apiRepository: SerpApiRepository get() = _apiRepository!!
+
+    private var _storageRepository: StorageRepository? = null
+    val storageRepository get() = _storageRepository!!
+
     override fun onCreate() {
         super.onCreate()
         val db = ReviewDatabase.getInstance(this)
@@ -29,7 +38,8 @@ class ReviewerApplication : Application() {
         val httpClient = configureHttpClient()
         ServiceLocator.setHttpClient(httpClient)
         ServiceLocator.setCacheDir(cacheDir.path)
-        ServiceLocator.setMediaDir(filesDir.path + "/media")
+        ServiceLocator.setMediaDir(filesDir.absolutePath + "/media")
+        _storageRepository = StorageRepositoryImpl()
         _apiRepository = SerpApiRepositoryImpl()
     }
 
@@ -56,7 +66,4 @@ class ReviewerApplication : Application() {
             }
         }
     }
-
-    val userRepository: DataBaseRepository get() = _userRepository!!
-    val apiRepository: SerpApiRepository get() = _apiRepository!!
 }

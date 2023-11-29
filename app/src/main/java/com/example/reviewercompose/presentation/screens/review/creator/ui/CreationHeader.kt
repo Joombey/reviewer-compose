@@ -1,23 +1,26 @@
 package com.example.reviewercompose.presentation.screens.review.creator.ui
 
-import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,20 +48,47 @@ fun ReviewCreationHeader(
     modifier: Modifier = Modifier,
 ) {
     var query: String by rememberSaveable { mutableStateOf("") }
+    Log.i("state2", uiState.toString())
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter
     ) {
-        if (uiState is ReviewCreationHeaderUiState.Searching) {
-            ProductSearchBar(
-                contentList = uiState.productList,
-                queryText = query,
-                onQueryChange = { query = it },
-                onSearchButtonClick = onSearchButtonClick,
-                onProductChoose = onProductChoose
-            )
-        } else {
-            ProductTitleBar()
+        when (uiState) {
+            is ReviewCreationHeaderUiState.ProductChosen -> {
+                ProductRow(
+                    product = uiState.chosenProduct,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            is ReviewCreationHeaderUiState.Searching -> {
+                ProductSearchBar(
+                    contentList = uiState.productList,
+                    queryText = query,
+                    onQueryChange = { query = it },
+                    onSearchButtonClick = onSearchButtonClick,
+                    onProductChoose = onProductChoose,
+                    errorCode = uiState.errorCode,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            ReviewCreationHeaderUiState.NotChosen -> {
+                ReviewerTextField(
+                    hint = "Товар",
+                    text = query,
+                    onTextChange = { query = it },
+                    keyboardType = KeyboardType.Text,
+                    trailingIcon = {
+                        Icon(
+                            modifier = Modifier.clickable { onSearchButtonClick(query) },
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -70,73 +100,102 @@ fun ProductSearchBar(
     onQueryChange: (String) -> Unit,
     onSearchButtonClick: (String) -> Unit,
     onProductChoose: (Product) -> Unit,
+    errorCode: Int?,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(vertical = 4.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(max = 100.dp),
-    ) {
-        item {
-            ReviewerTextField(
-                hint = "Товар",
-                text = queryText,
-                onTextChange = onQueryChange,
-                keyboardType = KeyboardType.Text,
-                trailingIcon = {
-                    Icon(
-                        modifier = Modifier.clickable { onSearchButtonClick(queryText) },
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = null
-                    )
+    Column {
+        ReviewerTextField(
+            hint = "Товар",
+            text = queryText,
+            onTextChange = onQueryChange,
+            keyboardType = KeyboardType.Text,
+            trailingIcon = {
+                Icon(
+                    modifier = Modifier.clickable { onSearchButtonClick(queryText) },
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = null
+                )
+            },
+            modifier = modifier
+        )
+        when (errorCode) {
+            400 -> {
+                Text(text = "Проблема с интернетом")
+            }
+
+            500 -> {
+                Text(text = "Проблема с cервером")
+            }
+
+            else -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 250.dp),
+                ) {
+                    when (errorCode) {
+                        400 -> {
+                            item {
+                                Text(text = "Проблема с интернетом")
+                            }
+                        }
+
+                        500 -> {
+                            item {
+                                Text(text = "Проблема с cервером")
+                            }
+                        }
+
+                        else -> {
+                            items(items = contentList, key = { it.hashCode() }) {
+                                ProductRow(
+                                    product = it,
+                                    modifier = Modifier.clickable { onProductChoose(it) }
+                                )
+                            }
+                        }
+                    }
                 }
-            )
-        }
-        items(items = contentList, key = { it.hashCode() }) {
-            ProductRow(
-                item = it,
-                modifier = Modifier.clickable { onProductChoose(it) }
-            )
+            }
         }
     }
 }
 
 @Composable
-fun ProductTitleBar() {
-
-}
-
-@Composable
 fun ProductRow(
-    item: Product,
-    bitmap: Bitmap? = null,
-    modifier: Modifier = Modifier
+    product: Product,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = modifier,
     ) {
-        if (bitmap == null) {
-            Spacer(
-                Modifier
-                    .size(width = 60.dp, height = 50.dp)
-                    .background(Color.Gray)
-            )
-        } else {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .size(width = 60.dp, height = 50.dp)
-                    .weight(1f)
-            )
+        Column {
+            if (product.image == null) {
+                Spacer(
+                    Modifier
+                        .size(width = 60.dp, height = 50.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.Gray)
+                )
+            } else {
+                Image(
+                    bitmap = product.image.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(width = 60.dp, height = 50.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+            Row {
+                Icon(imageVector = Icons.Filled.StarBorder, contentDescription = null)
+                Text(modifier = Modifier
+                    .paddingFromBaseline(bottom = 4.dp)
+                    .padding(4.dp), text = product.rating)
+            }
         }
-        Text(
-            text = item.title,
-            modifier = Modifier.weight(1f)
-        )
+        Text(modifier = Modifier.padding(horizontal = 4.dp), text = product.title)
     }
 }
