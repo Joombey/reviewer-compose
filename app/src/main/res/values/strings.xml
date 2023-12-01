@@ -8,4 +8,5 @@
     <string name="review_creation_screen_label">Создать</string>
     <string name="sign_up_label">Зарегистрироваться</string>
     <string name="profile_screen_label">Профиль</string>
+    <string name="review_title_label">Заголовок отзыва</string>
 </resources>

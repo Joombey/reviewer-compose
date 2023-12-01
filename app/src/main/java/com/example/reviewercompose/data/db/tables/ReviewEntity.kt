@@ -27,7 +27,6 @@ import java.util.UUID
             deferred = true
         )
     ],
-//    primaryKeys = ["id", "user_id"],
     indices = [
         Index(value = ["item_id", "id"]),
         Index(value = ["user_id"], unique = true)
@@ -38,7 +37,7 @@ data class ReviewEntity(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
     @ColumnInfo("creation_date")
-    val creationDate: Long,
+    val creationDate: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "user_id")
     val userId: String,
     @ColumnInfo(name = "item_id")

@@ -49,12 +49,12 @@ class ReviewCreationViewModel(
     //image caching process job to stop when needed
     private var cachingJob: Job? = null
 
-    fun create(user: User, paragraphs: List<Paragraph>) = viewModelScope.launch(Dispatchers.IO) {
+    fun create(user: User, title: String, paragraphs: List<Paragraph>) = viewModelScope.launch(Dispatchers.IO) {
         (headerUiState.value as? ReviewCreationHeaderUiState.ProductChosen)?.let { state ->
             val path = state.chosenProduct.image?.let { bitmap ->
                 storageRepository.saveImage(bitmap)
             }
-            dbRepository.createReview(user, state.chosenProduct, paragraphs, path)
+            dbRepository.createReview(user, state.chosenProduct, title, paragraphs, path)
         } ?: _errorChannel.send("Предмет обзора не выбран")
     }
 

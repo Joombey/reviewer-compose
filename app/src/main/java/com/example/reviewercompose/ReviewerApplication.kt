@@ -34,12 +34,12 @@ class ReviewerApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val db = ReviewDatabase.getInstance(this)
-        _userRepository = DataBaseRepositoryImpl(db)
         val httpClient = configureHttpClient()
         ServiceLocator.setHttpClient(httpClient)
         ServiceLocator.setCacheDir(cacheDir.path)
         ServiceLocator.setMediaDir(filesDir.absolutePath + "/media")
-        _storageRepository = StorageRepositoryImpl()
+        _storageRepository = StorageRepositoryImpl(contentResolver)
+        _userRepository = DataBaseRepositoryImpl(db, storageRepository)
         _apiRepository = SerpApiRepositoryImpl()
     }
 

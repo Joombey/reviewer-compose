@@ -1,6 +1,7 @@
 package com.example.reviewercompose.presentation.screens.register.ui
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,8 +19,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,7 +46,10 @@ import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerButton
 import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerTextField
 import com.example.reviewercompose.presentation.screens.auth.ui.rememberAuthInputSavable
 import com.example.reviewercompose.utils.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun RegistrationScreen(
@@ -153,8 +159,17 @@ fun ImageWithAddPlaceholder(
     onAddButtonPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val contentResolver = LocalContext.current.contentResolver
+    LaunchedEffect(key1 = uri) {
+        if (uri == null) return@LaunchedEffect
+        val source: ImageDecoder.Source = withContext(Dispatchers.IO) {
+            ImageDecoder.createSource(contentResolver, uri)
+        }
+        bitmap = ImageDecoder.decodeBitmap(source)
+    }
     Box(modifier) {
-        if (uri == null) {
+        if (bitmap == null) {
             Image(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -164,13 +179,10 @@ fun ImageWithAddPlaceholder(
                     .clickable(onClick = onAddButtonPress)
             )
         } else {
-            val contentResolver = LocalContext.current.contentResolver
-            val source: ImageDecoder.Source = ImageDecoder.createSource(contentResolver, uri)
-            val bitmap = ImageDecoder.decodeBitmap(source)
             Image(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                bitmap = bitmap.asImageBitmap(),
+                bitmap = bitmap!!.asImageBitmap(),
                 modifier = Modifier
                     .size(100.dp)
                     .clickable(onClick = onAddButtonPress)

@@ -126,7 +126,7 @@ fun ReviewerApp(
             route = Screen.UserProfileScreen.route,
             arguments = Screen.UserProfileScreen.args
         ) {
-            UserPageScreen()
+            UserPageScreen(currentUser!!.id)
         }
 
         navigation(

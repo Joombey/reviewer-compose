@@ -42,9 +42,9 @@ data class ImageEntity(
     val id: String = UUID.randomUUID().toString(),
     val uri: String,
     @ColumnInfo("user_id")
-    val userId: String?,
+    val userId: String? = null,
     @ColumnInfo("item_id")
-    val itemId: String?,
+    val itemId: String? = null,
     @ColumnInfo("paragraph_id")
-    val paragraphId: String?
+    val paragraphId: String? = null
 )

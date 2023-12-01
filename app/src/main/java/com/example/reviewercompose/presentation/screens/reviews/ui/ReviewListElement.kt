@@ -12,17 +12,21 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,30 +37,55 @@ fun ReviewElement(
     itemImageBitmap: Bitmap,
     title: String,
     date: String,
+    userName: String,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface)
-            .padding(10.dp),
+            .padding(8.dp),
     ) {
-        UserIconWithTitle(
-            userIcon = userIcon,
-            title = title,
-            date = date,
-            modifier = modifier.fillMaxWidth()
+        Box() {
+            Image(
+                bitmap = itemImageBitmap.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp),
+                contentScale = ContentScale.Fit
+            )
+            Text(
+                text = date,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clip(RoundedCornerShape(12.dp))
+                    .align(Alignment.BottomEnd),
+                style = MaterialTheme.typography.labelMedium.copy(fontStyle = FontStyle.Italic)
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         )
 
-        Image(
-            painter = BitmapPainter(userIcon.asImageBitmap()),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .heightIn(300.dp)
-                .fillMaxWidth()
-                .clip(CircleShape)
-        )
+        Row(modifier = Modifier.heightIn(100.dp)) {
+            Icon(
+                bitmap = userIcon.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = userName,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+//        Button(onClick = { /*TODO*/ }) {
+//
+//        }
     }
 }
 

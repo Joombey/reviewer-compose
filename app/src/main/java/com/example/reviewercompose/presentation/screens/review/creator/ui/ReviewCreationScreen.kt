@@ -13,19 +13,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,6 +38,7 @@ import com.example.reviewercompose.R
 import com.example.reviewercompose.data.entities.Paragraph
 import com.example.reviewercompose.data.entities.User
 import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerButton
+import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerTextField
 import com.example.reviewercompose.presentation.screens.review.creator.ReviewCreationViewModel
 import com.example.reviewercompose.presentation.theme.ParagraphBackground
 import com.example.reviewercompose.utils.toast
@@ -50,29 +56,42 @@ fun ReviewCreationScreen(
         val uiState by viewModel.headerUiState.collectAsStateWithLifecycle()
         val lazyListState = rememberLazyListState()
         val paragraphs: MutableList<Pair<String, Paragraph>> = rememberSavableParagraphList(
-            listOf(UUID.randomUUID().toString() to Paragraph())
+            listOf(UUID.randomUUID().toString() to Paragraph()).toMutableStateList()
         )
         LaunchedEffect(key1 = viewModel) {
             viewModel.errorChannel.receiveAsFlow().collect { context.toast(it) }
         }
+        var title by rememberSaveable { mutableStateOf("") }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             state = lazyListState,
         ) {
-            item {
-                ReviewCreationHeader(
-                    onSearchButtonClick = viewModel::query,
-                    onProductChoose = viewModel::chooseProduct,
-                    uiState = uiState,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+            item(contentType = "Header") {
+                Column(Modifier.padding(vertical = 8.dp)) {
+                    ReviewerTextField(
+                        hint = stringResource(R.string.review_title_label),
+                        text = title,
+                        onTextChange = { title = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    ReviewCreationHeader(
+                        onSearchButtonClick = viewModel::query,
+                        onProductChoose = viewModel::chooseProduct,
+                        uiState = uiState,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
             }
-            itemsIndexed(items = paragraphs, key = { _, item -> item.first }) { id, pair ->
+            itemsIndexed(
+                items = paragraphs,
+                key = { _, item -> item.first },
+                contentType = { _, _ -> "list" })
+            { id, pair ->
                 val item: Paragraph = pair.second
-                Column(modifier = Modifier
-                    .fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     ParagraphElement(
                         item = item,
                         onTitleTextChange = {
@@ -110,7 +129,7 @@ fun ReviewCreationScreen(
             item {
                 ReviewerButton(
                     text = stringResource(R.string.review_creation_screen_label),
-                    onClick = { viewModel.create(user, paragraphs.map { it.second }) },
+                    onClick = { viewModel.create(user, title, paragraphs.map { it.second }) },
                     modifier = Modifier
                 )
             }
@@ -118,19 +137,23 @@ fun ReviewCreationScreen(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 @Composable
 fun rememberSavableParagraphList(initialList: List<Pair<String, Paragraph>> = emptyList()): MutableList<Pair<String, Paragraph>> {
-    val saver: Saver<List<Pair<String, Paragraph>>, *> = listSaver(
+    val saver: Saver<SnapshotStateList<Pair<String, Paragraph>>, *> = listSaver(
         save = { listToSave ->
             listToSave.map {
                 listOf(it.first, it.second.title, it.second.text, it.second.photosUris)
             }
         },
         restore = { listToRestore ->
-            listToRestore.map {
-                Pair(it[0] as String, Paragraph(it[1] as String, it[2] as String, it[3] as List<String>))
-            }
+            listToRestore.toMutableList().map {
+                Pair(
+                    it[0] as String,
+                    Paragraph(it[1] as String, it[2] as String, it[3] as List<String>)
+                )
+            }.toMutableStateList()
         }
     )
-    return rememberSaveable(saver = saver) { initialList.toMutableStateList() }.toMutableStateList()
+    return rememberSaveable(saver = saver) { initialList.toMutableStateList() }
 }

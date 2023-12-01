@@ -1,5 +1,6 @@
 package com.example.reviewercompose.data.repository.api
 
+import android.util.Log
 import com.example.reviewercompose.BuildConfig
 import com.example.reviewercompose.ServiceLocator
 import io.ktor.client.call.body
@@ -15,7 +16,6 @@ import java.nio.ByteBuffer
 
 class SerpApiRepositoryImpl : SerpApiRepository {
     private val client = ServiceLocator.httpClient
-    private val cacheDir: String = ServiceLocator.cacheDir
     override suspend fun query(query: String): QueryResult = try {
         client.get(BuildConfig.SHOPPING_URL) {
             url { parameter("q", query) }
@@ -24,6 +24,9 @@ class SerpApiRepositoryImpl : SerpApiRepository {
         QueryResult.ClientError
     } catch (_: ServerResponseException) {
         QueryResult.ServerError
+    } catch (e: Exception) {
+        Log.e("ktor", e.toString(), e)
+        QueryResult.ClientError
     }
 
     @OptIn(InternalAPI::class)
