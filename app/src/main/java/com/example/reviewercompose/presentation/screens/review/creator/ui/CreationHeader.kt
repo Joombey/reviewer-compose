@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,6 +71,7 @@ fun ReviewCreationHeader(
                     onSearchButtonClick = onSearchButtonClick,
                     onProductChoose = onProductChoose,
                     errorCode = uiState.errorCode,
+                    isLoading = uiState.isLoading,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -100,6 +103,7 @@ fun ProductSearchBar(
     onQueryChange: (String) -> Unit,
     onSearchButtonClick: (String) -> Unit,
     onProductChoose: (Product) -> Unit,
+    isLoading: Boolean,
     errorCode: Int?,
     modifier: Modifier = Modifier
 ) {
@@ -134,16 +138,24 @@ fun ProductSearchBar(
                         .fillMaxWidth()
                         .heightIn(max = 250.dp),
                 ) {
-                    when (errorCode) {
-                        400 -> {
+                    when {
+                        errorCode == 400 -> {
                             item {
                                 Text(text = "Проблема с интернетом")
                             }
                         }
 
-                        500 -> {
+                        errorCode == 500 -> {
                             item {
                                 Text(text = "Проблема с cервером")
+                            }
+                        }
+
+                        isLoading -> {
+                            item{
+                                Box(Modifier.fillMaxWidth().heightIn(70.dp)) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
                         }
 
@@ -191,9 +203,11 @@ fun ProductRow(
             }
             Row {
                 Icon(imageVector = Icons.Filled.StarBorder, contentDescription = null)
-                Text(modifier = Modifier
-                    .paddingFromBaseline(bottom = 4.dp)
-                    .padding(4.dp), text = product.rating)
+                Text(
+                    modifier = Modifier
+                        .paddingFromBaseline(bottom = 4.dp)
+                        .padding(4.dp), text = product.rating
+                )
             }
         }
         Text(modifier = Modifier.padding(horizontal = 4.dp), text = product.title)

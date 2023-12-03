@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,14 +40,17 @@ import com.example.reviewercompose.data.entities.Paragraph
 import com.example.reviewercompose.data.entities.User
 import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerButton
 import com.example.reviewercompose.presentation.screens.auth.ui.ReviewerTextField
+import com.example.reviewercompose.presentation.screens.review.creator.ReviewCreationEvent
 import com.example.reviewercompose.presentation.screens.review.creator.ReviewCreationViewModel
 import com.example.reviewercompose.presentation.theme.ParagraphBackground
 import com.example.reviewercompose.utils.toast
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @Composable
 fun ReviewCreationScreen(
+    onReviewCreated: () -> Unit,
     user: User,
     modifier: Modifier = Modifier,
     viewModel: ReviewCreationViewModel = viewModel(factory = ReviewCreationViewModel.Factory)
@@ -58,8 +62,16 @@ fun ReviewCreationScreen(
         val paragraphs: MutableList<Pair<String, Paragraph>> = rememberSavableParagraphList(
             listOf(UUID.randomUUID().toString() to Paragraph()).toMutableStateList()
         )
+        val latestReviewCreation by rememberUpdatedState(onReviewCreated)
         LaunchedEffect(key1 = viewModel) {
-            viewModel.errorChannel.receiveAsFlow().collect { context.toast(it) }
+            launch {
+                viewModel.errorChannel.receiveAsFlow().collect { context.toast(it) }
+            }
+            launch {
+                viewModel.eventChannel.receiveAsFlow().collect {
+                    if (it == ReviewCreationEvent.ReviewCreated) { latestReviewCreation() }
+                }
+            }
         }
         var title by rememberSaveable { mutableStateOf("") }
         LazyColumn(
@@ -129,7 +141,9 @@ fun ReviewCreationScreen(
             item {
                 ReviewerButton(
                     text = stringResource(R.string.review_creation_screen_label),
-                    onClick = { viewModel.create(user, title, paragraphs.map { it.second }) },
+                    onClick = {
+                        viewModel.create(user, title, paragraphs.map { it.second })
+                    },
                     modifier = Modifier
                 )
             }

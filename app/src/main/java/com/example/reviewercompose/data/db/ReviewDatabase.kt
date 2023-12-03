@@ -27,7 +27,7 @@ import com.example.reviewercompose.data.entities.User
     views = [
         User::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class ReviewDatabase : RoomDatabase() {

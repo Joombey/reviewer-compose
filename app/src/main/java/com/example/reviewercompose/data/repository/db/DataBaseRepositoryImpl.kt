@@ -18,11 +18,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.Dispatcher
 import java.lang.System.currentTimeMillis
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DataBaseRepositoryImpl(
     private val db: ReviewDatabase,
     private val storageRepository: StorageRepository
-): DataBaseRepository {
+) : DataBaseRepository {
     override suspend fun createUser(user: User, login: String, password: String) {
         val userEntity = UserEntity(
             isCurrent = true,
@@ -91,7 +94,9 @@ class DataBaseRepositoryImpl(
                         id = reviewEntity.id,
                         author = user,
                         item = item,
-                        paragraphs = paragraphs
+                        title = reviewEntity.title,
+                        paragraphs = paragraphs,
+                        date = reviewEntity.creationDate.asDateTimeString()
                     )
                 }
             }
@@ -99,4 +104,9 @@ class DataBaseRepositoryImpl(
     }
 
     override val currentUser: Flow<User?> = db.userDao.currentUser()
+}
+
+fun Long.asDateTimeString(): String {
+    val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH)
+    return sdf.format(Date(this))
 }

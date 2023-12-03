@@ -37,13 +37,16 @@ class ReviewCreationViewModel(
     private val storageRepository: StorageRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val _eventChannel = Channel<ReviewCreationEvent>()
+    val eventChannel: ReceiveChannel<ReviewCreationEvent> get() = _eventChannel
     //message event channel
     private val _errorChannel = Channel<String>()
-    val errorChannel: ReceiveChannel<String> = _errorChannel
 
+    val errorChannel: ReceiveChannel<String> = _errorChannel
     //uiState
     private val _headerUiState =
         MutableStateFlow<ReviewCreationHeaderUiState>(ReviewCreationHeaderUiState.NotChosen)
+
     val headerUiState: StateFlow<ReviewCreationHeaderUiState> get() = _headerUiState
 
     //image caching process job to stop when needed
@@ -55,15 +58,18 @@ class ReviewCreationViewModel(
                 storageRepository.saveImage(bitmap)
             }
             dbRepository.createReview(user, state.chosenProduct, title, paragraphs, path)
+            _eventChannel.send(ReviewCreationEvent.ReviewCreated)
         } ?: _errorChannel.send("Предмет обзора не выбран")
     }
 
     fun query(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
             cachingJob?.cancelAndJoin()
+            _headerUiState.update { ReviewCreationHeaderUiState.Searching(emptyList()) }
             when (val result = apiRepository.query(query)) {
                 QueryResult.ClientError -> _headerUiState.update {
                     ReviewCreationHeaderUiState.Searching(
+                        isLoading = false,
                         productList = emptyList(),
                         errorCode = 400
                     )
@@ -72,7 +78,8 @@ class ReviewCreationViewModel(
                 is QueryResult.SerpApiShoppingResponse -> {
                     _headerUiState.update {
                         ReviewCreationHeaderUiState.Searching(
-                            result.shoppingResults.map {
+                            isLoading = false,
+                            productList = result.shoppingResults.map {
                                 Product(
                                     productId = it.productId,
                                     title = it.title,
@@ -89,6 +96,7 @@ class ReviewCreationViewModel(
 
                 QueryResult.ServerError -> _headerUiState.update {
                     ReviewCreationHeaderUiState.Searching(
+                        isLoading = false,
                         productList = emptyList(),
                         errorCode = 500
                     )
@@ -104,7 +112,7 @@ class ReviewCreationViewModel(
     }
 
     private fun beginCaching(productImages: List<String>) =
-        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { coroutineContext, throwable ->
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
             Log.e("ktor", "beginCaching: $throwable", throwable)
         }) {
             productImages.forEachIndexed { index, image ->
@@ -146,9 +154,14 @@ class ReviewCreationViewModel(
     }
 }
 
+enum class ReviewCreationEvent {
+    ReviewCreated
+}
+
 sealed interface ReviewCreationHeaderUiState {
     data class Searching(
         val productList: List<Product>,
+        val isLoading: Boolean = true,
         val errorCode: Int? = null
     ) : ReviewCreationHeaderUiState
 

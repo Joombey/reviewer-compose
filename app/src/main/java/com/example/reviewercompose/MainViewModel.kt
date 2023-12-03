@@ -16,25 +16,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.plus
 
 class MainViewModel(
     private val userRepository: DataBaseRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _userAuthState = MutableStateFlow<UserAuthState>(UserAuthState.Unauthorized)
-//    val availableScreens: StateFlow<UserAuthState> = flow {
-//        _currentUser.collect {
-//            when (it) {
-//                is UserAuthState.Authorized -> emit(Screen.authenticatedScreens)
-//                UserAuthState.Unauthorized -> emit(Screen.unAuthenticatedScreens)
-//            }
-//        }
-//    }.stateIn(
-//        scope = viewModelScope,
-//        started = SharingStarted.Lazily,
-//        initialValue = UserAuthState.Unauthorized
-//    )
-
     val userAuthState get() = _userAuthState.asStateFlow()
 
     init {

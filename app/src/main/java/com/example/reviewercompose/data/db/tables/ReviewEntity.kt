@@ -29,7 +29,7 @@ import java.util.UUID
     ],
     indices = [
         Index(value = ["item_id", "id"]),
-        Index(value = ["user_id"], unique = true)
+        Index(value = ["user_id"])
     ]
 )
 data class ReviewEntity(

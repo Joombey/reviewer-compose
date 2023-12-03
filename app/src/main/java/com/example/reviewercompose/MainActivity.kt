@@ -1,6 +1,7 @@
 package com.example.reviewercompose
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -35,6 +36,7 @@ import com.example.reviewercompose.presentation.screens.review.creator.ui.Review
 import com.example.reviewercompose.presentation.screens.reviews.ui.ReviewListScreen
 import com.example.reviewercompose.presentation.theme.ReviewerComposeTheme
 import com.example.reviewercompose.utils.toast
+import kotlin.system.measureTimeMillis
 
 class MainActivity : ComponentActivity() {
     private val activityViewModel: MainViewModel by viewModels() { MainViewModel.Factory }
@@ -66,6 +68,9 @@ class MainActivity : ComponentActivity() {
                     ReviewerApp(
                         onSignUpComplete = {
                             navController.navigateWithOptionsTo(Screen.ReviewListScreen.route)
+                        },
+                        onReviewCreated = {
+                            navController.navigateWithStateLoss(Screen.ReviewListScreen.route)
                         },
                         currentUser = (userAuthState as? UserAuthState.Authorized)?.user,
                         navController = navController,
@@ -102,6 +107,7 @@ fun ReviewerBottomAppBar(
 @Composable
 fun ReviewerApp(
     onSignUpComplete: () -> Unit,
+    onReviewCreated: () -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier,
     currentUser: User? = null
@@ -112,7 +118,7 @@ fun ReviewerApp(
         modifier = modifier
     ) {
         composable(Screen.ReviewCreationScreen.route) { navBackStackEntry ->
-            ReviewCreationScreen(currentUser!!)
+            ReviewCreationScreen(onReviewCreated, currentUser!!)
         }
 
         composable(
@@ -162,6 +168,16 @@ fun NavController.navigateWithOptionsTo(route: String) {
         restoreState = true
         popUpTo(Screen.ReviewListScreen.route) {
             this.saveState = true
+        }
+    }
+}
+
+fun NavController.navigateWithStateLoss(route: String) {
+    navigate(route) {
+        launchSingleTop = true
+        restoreState = false
+        popUpTo(Screen.ReviewListScreen.route) {
+            saveState = false
         }
     }
 }
