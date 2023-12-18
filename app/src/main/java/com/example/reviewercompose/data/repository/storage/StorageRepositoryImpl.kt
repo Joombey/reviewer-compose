@@ -6,14 +6,13 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reviewercompose.ServiceLocator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
-class StorageRepositoryImpl(val contentResolver: ContentResolver): StorageRepository {
+class StorageRepositoryImpl(private val contentResolver: ContentResolver): StorageRepository {
     private val dir = ServiceLocator.mediaDir
     private val dirCreated get() = File(dir).exists()
     override suspend fun saveFile(data: ByteArray): String = withContext(Dispatchers.IO) {
@@ -44,14 +43,14 @@ class StorageRepositoryImpl(val contentResolver: ContentResolver): StorageReposi
 
     override suspend fun getBitmapFromUri(uri: Uri): Bitmap? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val data = contentResolver.openInputStream(uri).use {
-                it?.readBytes()
+            val data = contentResolver.openInputStream(uri)?.use {
+                it.readBytes()
             }
             val source = ImageDecoder.createSource(data ?: return null)
             ImageDecoder.decodeBitmap(source)
         }
         else {
-            contentResolver.openInputStream(uri).use {
+            contentResolver.openInputStream(uri)?.use {
                 BitmapFactory.decodeStream(it)
             }
         }

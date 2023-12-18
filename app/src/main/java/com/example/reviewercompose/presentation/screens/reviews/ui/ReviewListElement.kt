@@ -64,8 +64,8 @@ import androidx.compose.ui.window.PopupProperties
 
 @Composable
 fun ReviewElement(
-    userIcon: Bitmap,
-    itemImageBitmap: Bitmap,
+    userIcon: Bitmap?,
+    itemImageBitmap: Bitmap?,
     title: String,
     paragraphs: List<String>,
     date: String,
@@ -133,21 +133,29 @@ fun DropDownParagraphMenu(
 }
 
 @Composable
-fun UserRow(userIcon: Bitmap, userName: String, modifier: Modifier) {
+fun UserRow(userIcon: Bitmap?, userName: String, modifier: Modifier) {
     var rowSize by remember { mutableStateOf(Size.Zero) }
     Row(
         modifier.onGloballyPositioned { rowSize = it.size.toSize() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            bitmap = userIcon.asImageBitmap(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
+        if (userIcon != null) {
+            Image(
+                bitmap = userIcon.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
 //                .weight(1f)
+                    .size(with(LocalDensity.current) { rowSize.height.toDp() })
+                    .clip(CircleShape)
+            )
+        } else {
+            Box(Modifier
                 .size(with(LocalDensity.current) { rowSize.height.toDp() })
                 .clip(CircleShape)
-        )
+                .background(Color.Gray)
+            )
+        }
         Text(
             text = userName,
             modifier = Modifier.weight(3f),
@@ -158,16 +166,24 @@ fun UserRow(userIcon: Bitmap, userName: String, modifier: Modifier) {
 }
 
 @Composable
-fun ImageWithText(image: Bitmap, date: String, modifier: Modifier = Modifier) {
+fun ImageWithText(image: Bitmap?, date: String, modifier: Modifier = Modifier) {
     Box(modifier) {
-        Image(
-            bitmap = image.asImageBitmap(),
-            contentDescription = null,
-            modifier = Modifier
+        if (image != null) {
+            Image(
+                bitmap = image.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp),
+                contentScale = ContentScale.Fit
+            )
+        } else {
+            Box(Modifier
                 .fillMaxWidth()
-                .heightIn(max = 200.dp),
-            contentScale = ContentScale.Fit
-        )
+                .heightIn(max = 200.dp)
+                .background(Color.Gray)
+            )
+        }
         Text(
             text = date,
             modifier = Modifier

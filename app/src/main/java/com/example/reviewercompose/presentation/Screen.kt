@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.SensorDoor
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.reviewercompose.R
@@ -15,6 +16,7 @@ import com.example.reviewercompose.R
 sealed interface Screen {
     val route: String
     val navIcon: ImageVector? get() = null
+
     @get:StringRes
     val label: Int? get() = null
     val args: List<NamedNavArgument>
@@ -24,6 +26,14 @@ sealed interface Screen {
         override val route: String = "reviews"
         override val navIcon: ImageVector = Icons.Filled.ViewList
         override val label: Int = R.string.reviews_screen_label
+    }
+
+    object Review : Screen {
+        override val route: String = "review/{id}"
+        override val label: Int = R.string.reviews_screen_label
+        override val args: List<NamedNavArgument> = listOf(
+            navArgument("id") { type = NavType.StringType }
+        )
     }
 
 
@@ -43,12 +53,21 @@ sealed interface Screen {
                 type = NavType.StringType
             }
         )
+
+        inline fun buildRouteWithArguments(block: (String, NavArgument) -> Unit): String {
+            var resultRoute = "user?"
+            for (arg in args) {
+                resultRoute += "${arg.name}=${block(arg.name, arg.argument)}&"
+            }
+            return resultRoute.slice(0 until (resultRoute.length - 1))
+        }
     }
 
     object AuthGraph : Screen {
         override val route: String = "auth"
         override val navIcon: ImageVector = Icons.Filled.SensorDoor
         override val label: Int = R.string.sign_in_screen_label
+
         object AuthScreen : Screen {
             override val route: String = "${AuthGraph.route}/sign-in"
         }

@@ -14,4 +14,7 @@ interface ReviewDao {
 
     @Query("SELECT * FROM REVIEWS WHERE user_id = :userId")
     fun getUserReviewList(userId: String): Flow<List<ReviewEntity>>
+
+    @Query("SELECT * FROM REVIEWS")
+    fun getAllReviews(): Flow<List<ReviewEntity>>
 }

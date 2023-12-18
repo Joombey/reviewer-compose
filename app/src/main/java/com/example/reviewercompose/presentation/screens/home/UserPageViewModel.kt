@@ -7,40 +7,43 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.reviewercompose.ReviewerApplication
 import com.example.reviewercompose.data.entities.Review
 import com.example.reviewercompose.data.repository.db.DataBaseRepository
 import com.example.reviewercompose.data.repository.storage.StorageRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class UserPageViewModel(
     userId: String,
-    dbRepository: DataBaseRepository,
-    storageRepository: StorageRepository,
-    savedStateHandle: SavedStateHandle
-): ViewModel() {
+    private val dbRepository: DataBaseRepository,
+    private val storageRepository: StorageRepository,
+) : ViewModel() {
+    suspend fun exit() {
+        dbRepository.exit()
+    }
 
     private val _uiState = UserPageUiMutable("", null, emptyList())
     val uiState get() = _uiState as UserPageUiState
+
     init {
         dbRepository.currentUser
             .onEach { user ->
                 _uiState.name = user?.name ?: ""
-                _uiState.icon = user?.let { storageRepository.getBitmapFromUri(Uri.parse(user.iconUri)) }
+                _uiState.icon = user?.let {
+                    if (it.iconUri == "null") return@let null
+
+                    val uri = Uri.parse(it.iconUri)
+                    storageRepository.getBitmapFromUri(uri)
+                }
             }
             .launchIn(viewModelScope)
         dbRepository.getUserReviewFor(userId)
-            .onEach { reviewList->
+            .onEach { reviewList ->
                 _uiState.reviews.apply {
                     clear()
                     addAll(reviewList)
@@ -54,12 +57,10 @@ class UserPageViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val app =
                 extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ReviewerApplication
-            val savedStateHandle = extras.createSavedStateHandle()
             return UserPageViewModel(
                 userId,
                 app.userRepository,
                 app.storageRepository,
-                savedStateHandle
             ) as T
         }
     }
@@ -73,7 +74,7 @@ class UserPageViewModel(
 
 
     @Stable
-    private class UserPageUiMutable(
+    class UserPageUiMutable(
         name: String,
         icon: Bitmap?,
         reviews: List<Review>

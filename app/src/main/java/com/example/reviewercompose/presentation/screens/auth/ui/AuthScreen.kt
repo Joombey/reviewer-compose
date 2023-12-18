@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,13 +33,14 @@ import com.example.reviewercompose.R
 import com.example.reviewercompose.presentation.screens.auth.AuthViewModel
 import com.example.reviewercompose.presentation.theme.PlaceholderGreen
 import com.example.reviewercompose.presentation.theme.PlaceholderPink
+import kotlinx.coroutines.launch
 
 @Composable
 fun AuthScreen(
-    onLoginClick: (login: String, password: String) -> Unit,
+    onLogin: () -> Unit,
     onGoToRegisterClick: () -> Unit,
     modifier: Modifier = Modifier,
-    userPageViewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel)
 ) {
     val authInputStateHolder = rememberAuthInputSavable(
         hint = AuthInputStateHolder.AuthHint(
@@ -46,6 +48,7 @@ fun AuthScreen(
             passwordHint = stringResource(R.string.password_screen_label),
         )
     )
+    val scope = rememberCoroutineScope()
     Surface(modifier.padding(8.dp)) {
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
@@ -82,12 +85,13 @@ fun AuthScreen(
 
                 ReviewerButton(
                     text = stringResource(R.string.sign_in_screen_label),
-                    onClick = {
-                        onLoginClick(
+                    onClick = { scope.launch {
+                        val success = viewModel.tryAuth(
                             authInputStateHolder.login,
                             authInputStateHolder.password
                         )
-                    },
+                        if (success) { onLogin() }
+                    } },
                     modifier = Modifier.clip(
                         shape = RoundedCornerShape(
                             topStart = 4.dp,

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.reviewercompose.data.db.tables.UserEntity
 import com.example.reviewercompose.data.entities.User
 import kotlinx.coroutines.flow.Flow
@@ -22,5 +23,17 @@ interface UserDao {
 
     @Transaction
     @Query("SELECT * FROM User")
-    suspend fun getCurrentUser(): User
+    suspend fun getCurrentUser(): User?
+
+    @Query("UPDATE users SET is_current = :isCurrent WHERE id = :id")
+    suspend fun updateUser(isCurrent: Boolean, id: String)
+
+    @Transaction
+    suspend fun switchUser(idToUpdate: String, idToSwitch: String) {
+        updateUser(false, idToUpdate)
+        updateUser(true, idToSwitch)
+    }
+
+    @Query("SELECT * FROM users where login = :login and password = :password LIMIT 1")
+    suspend fun getUsersByLoginAndPassword(login: String, password: String): UserEntity?
 }

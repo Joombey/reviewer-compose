@@ -11,12 +11,11 @@ import com.example.reviewercompose.data.entities.Product
 import com.example.reviewercompose.data.entities.Review
 import com.example.reviewercompose.data.entities.User
 import com.example.reviewercompose.data.repository.storage.StorageRepository
-import com.example.reviewercompose.presentation.screens.review.creator.ui.ProductRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import java.lang.System.currentTimeMillis
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -70,7 +69,37 @@ class DataBaseRepositoryImpl(
     }
 
     override fun getUserReviewFor(userId: String): Flow<List<Review>> {
-        return db.reviewDao.getUserReviewList(userId).map { list ->
+        return db.reviewDao.getUserReviewList(userId).mapToReviews()
+    }
+
+    override fun getAllReviews(): Flow<List<Review>> {
+        return db.reviewDao.getAllReviews().mapToReviews()
+    }
+
+    override suspend fun getReviewByID(id: String): Review {
+        return getAllReviews().first().first { it.id == id }
+    }
+
+    override suspend fun switchUser(login: String, password: String) {
+        val userToUpdate = db.userDao.getUsersByLoginAndPassword(login, password) ?: return
+        val user = db.userDao.getCurrentUser()
+        user?.let { db.userDao.switchUser(user.id, userToUpdate.id) }
+            ?:let { db.userDao.updateUser(true, userToUpdate.id)}
+    }
+
+    override suspend fun exit() {
+        val user = db.userDao.getCurrentUser()!!
+        db.userDao.updateUser(false, user.id)
+    }
+
+    override suspend fun getUserIdByLoginPass(login: String, password: String): String? {
+        return db.userDao.getUsersByLoginAndPassword(login, password)?.id
+    }
+
+    override val currentUser: Flow<User?> = db.userDao.currentUser()
+
+    private fun Flow<List<ReviewEntity>>.mapToReviews(): Flow<List<Review>> {
+        return map { list ->
             withContext(Dispatchers.IO) {
                 list.map { reviewEntity ->
                     val item = db.itemDao.getById(reviewEntity.itemId).let { itemEntity ->
@@ -81,7 +110,7 @@ class DataBaseRepositoryImpl(
                             rating = itemEntity.rating?.toString() ?: "N/A"
                         )
                     }
-                    val user = db.userDao.getCurrentUser()
+                    val user = db.userDao.getCurrentUser()!!
                     val paragraphs = db.paragraphDao.getByReviewId(reviewEntity.id).map {
                         val uris = db.imageDao.getByParagraphId(it.id)
                         Paragraph(
@@ -102,8 +131,6 @@ class DataBaseRepositoryImpl(
             }
         }
     }
-
-    override val currentUser: Flow<User?> = db.userDao.currentUser()
 }
 
 fun Long.asDateTimeString(): String {

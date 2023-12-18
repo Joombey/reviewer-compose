@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.plus
 
 class MainViewModel(
     private val userRepository: DataBaseRepository,
@@ -24,7 +23,6 @@ class MainViewModel(
 ) : ViewModel() {
     private val _userAuthState = MutableStateFlow<UserAuthState>(UserAuthState.Unauthorized)
     val userAuthState get() = _userAuthState.asStateFlow()
-
     init {
         userRepository.currentUser
             .onEach {

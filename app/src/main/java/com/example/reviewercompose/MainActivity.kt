@@ -1,7 +1,6 @@
 package com.example.reviewercompose
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -33,13 +31,12 @@ import com.example.reviewercompose.presentation.screens.auth.ui.AuthScreen
 import com.example.reviewercompose.presentation.screens.home.ui.UserPageScreen
 import com.example.reviewercompose.presentation.screens.register.ui.RegistrationScreen
 import com.example.reviewercompose.presentation.screens.review.creator.ui.ReviewCreationScreen
+import com.example.reviewercompose.presentation.screens.review.view.ui.ReviewScreen
 import com.example.reviewercompose.presentation.screens.reviews.ui.ReviewListScreen
 import com.example.reviewercompose.presentation.theme.ReviewerComposeTheme
-import com.example.reviewercompose.utils.toast
-import kotlin.system.measureTimeMillis
 
 class MainActivity : ComponentActivity() {
-    private val activityViewModel: MainViewModel by viewModels() { MainViewModel.Factory }
+    private val activityViewModel: MainViewModel by viewModels { MainViewModel.Factory }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +68,15 @@ class MainActivity : ComponentActivity() {
                         },
                         onReviewCreated = {
                             navController.navigateWithStateLoss(Screen.ReviewListScreen.route)
+                        },
+                        onExit = {
+                            navController.navigateWithOptionsTo(Screen.AuthGraph.AuthScreen.route)
+                        },
+                        onLogin = {
+                            navController.navigateWithOptionsTo(Screen.ReviewListScreen.route)
+                        },
+                        onReviewClick = { reviewID: String ->
+                            navController.navigateWithOptionsTo("review/$reviewID")
                         },
                         currentUser = (userAuthState as? UserAuthState.Authorized)?.user,
                         navController = navController,
@@ -108,6 +114,9 @@ fun ReviewerBottomAppBar(
 fun ReviewerApp(
     onSignUpComplete: () -> Unit,
     onReviewCreated: () -> Unit,
+    onExit: () -> Unit,
+    onLogin: () -> Unit,
+    onReviewClick: (String) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier,
     currentUser: User? = null
@@ -117,22 +126,30 @@ fun ReviewerApp(
         startDestination = Screen.ReviewListScreen.route,
         modifier = modifier
     ) {
-        composable(Screen.ReviewCreationScreen.route) { navBackStackEntry ->
+        composable(Screen.ReviewCreationScreen.route) { _ ->
             ReviewCreationScreen(onReviewCreated, currentUser!!)
         }
 
         composable(
             route = Screen.ReviewListScreen.route,
             arguments = Screen.ReviewListScreen.args
-        ) { navBackStackEntry ->
-            ReviewListScreen()
+        ) { _ ->
+            ReviewListScreen(onReviewClick)
+        }
+
+        composable(
+            route = Screen.Review.route,
+            arguments = Screen.Review.args
+        ) {
+            val reviewID = it.arguments!!.getString("id")!!
+            ReviewScreen(reviewId = reviewID)
         }
 
         composable(
             route = Screen.UserProfileScreen.route,
             arguments = Screen.UserProfileScreen.args
         ) {
-            UserPageScreen(currentUser!!.id)
+            UserPageScreen(currentUser!!.id, onExit)
         }
 
         navigation(
@@ -143,9 +160,8 @@ fun ReviewerApp(
                 route = Screen.AuthGraph.AuthScreen.route,
                 arguments = Screen.AuthGraph.args
             ) {
-                val context = LocalContext.current
                 AuthScreen(
-                    onLoginClick = { login, password -> context.toast("$password $login") },
+                    onLogin = onLogin,
                     onGoToRegisterClick = {
                         navController.navigateWithOptionsTo(Screen.AuthGraph.RegisterScreen.route)
                     },
